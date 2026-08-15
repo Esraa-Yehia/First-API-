@@ -6,7 +6,7 @@ const validationSchema = () => {
             .notEmpty()
             .withMessage('Title is required'),
          
-        body('Price')
+        body('price')
             .notEmpty()
             .withMessage('Price is required')
        ]}
