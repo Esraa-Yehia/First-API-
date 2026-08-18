@@ -1,85 +1,71 @@
+const { validationResult } = require("express-validator");
+const Course = require("../models/course.model.js");
+const httpStatusText = require("../utils/httpStatusText.js");
+const asyncWrapper = require("../middlewares/asyncWrapper.js");
+const appError = require("../utils/appError.js");
 
-const {validationResult } = require('express-validator');
+const getAllCourses = asyncWrapper(async (req, res) => {
+  const query = req.query;
+  const limit = query.limit || 10;
+  const page = query.page || 1;
+  const skip = (page - 1) * limit;
 
-const Course = require('../models/course.model.js');
+  const courses = await Course.find({}, { __v: false }).limit(limit).skip(skip);
 
-const httpStatusText = require('../utils/httpStatusText.js');
+  res.json({ status: httpStatusText.SUCCESS, data: { courses } });
+});
 
+const getCourse = asyncWrapper(async (req, res, next) => {
+  const course = await Course.findById(req.params.courseId);
 
-
-
-const getAllCourses = async(req, res) => {
-
-   const query = req.query;
-   const limit = query.limit || 10;
-   const page = query.page || 1;
-   const skip = (page - 1) * limit;
-
-
-    const courses = await Course.find({},{"__v":false}).limit(limit).skip(skip);
-
-    res.json({status: httpStatusText.SUCCESS, data: {courses}});
-};
-
-
-const getCourse= async(req, res) => {
-   try{ 
-    const course = await Course.findById(req.params.courseId)
-
-    if (!course) {
-        return res.status(404).json({ status: httpStatusText.FAIL, data: {course: 'course not found'} });
-    }
-    return res.json({status: httpStatusText.SUCCESS, data: {course}});
+  if (!course) {
+    const error = appError.create("course not found", 404, httpStatusText.FAIL);
+    return next(error);
   }
-   
-   catch(err)
-   {
-    return res.status(400).json({ status: httpStatusText.ERROR, data:null,message:err.message , code: 400})
-   }
-};
 
-const addCourse=async(req, res) => 
-    {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ status: httpStatusText.FAIL, data:errors.array()});
-        }
-    
-        const newCourse = new Course(req.body);
+  return res.json({ status: httpStatusText.SUCCESS, data: { course } });
+});
 
-        await newCourse.save()
-        res.status(201).json({ status: httpStatusText.SUCCESS, data:{course:newCourse}});
-    }
+const addCourse = asyncWrapper(async (req, res, next) => {
+  const errors = validationResult(req);
 
-const updateCourse= async(req, res) => {
-    const courseId = req.params.courseId;
-     
-   try{
-    const updatedCourse = await Course.updateOne({_id : courseId} , {$set : {...req.body}})
+  if (!errors.isEmpty()) {
+    const error = appError.create(errors.array(), 400, httpStatusText.FAIL);
 
-   return res.status(200).json({ status: httpStatusText.SUCCESS, data:{course:updatedCourse}});
-   }
+    return next(error);
+  }
 
-   catch(err)
-   {
-      return res.status(400).json({ status: httpStatusText.ERROR, message: err.message});
+  const newCourse = new Course(req.body);
 
-    }
-   };
+  await newCourse.save();
+  res
+    .status(201)
+    .json({ status: httpStatusText.SUCCESS, data: { course: newCourse } });
+});
 
+const updateCourse = asyncWrapper(async (req, res) => {
+  const courseId = req.params.courseId;
 
-const deleteCourse= async(req, res) => {
-    
-    await Course.deleteOne({_id: req.params.courseId})
+  const updatedCourse = await Course.updateOne(
+    { _id: courseId },
+    { $set: { ...req.body } },
+  );
 
-    res.status(200).json({status: httpStatusText.SUCCESS, data:null});
-};
+  return res
+    .status(200)
+    .json({ status: httpStatusText.SUCCESS, data: { course: updatedCourse } });
+});
 
+const deleteCourse = asyncWrapper(async (req, res) => {
+  await Course.deleteOne({ _id: req.params.courseId });
+
+  res.status(200).json({ status: httpStatusText.SUCCESS, data: null });
+});
 
 module.exports = {
-    getAllCourses,
-    getCourse,
-    addCourse,
-    updateCourse,
-    deleteCourse
+  getAllCourses,
+  getCourse,
+  addCourse,
+  updateCourse,
+  deleteCourse,
 };
