@@ -19,6 +19,9 @@ app.use(express.json());
 const coursesRoutes = require("./routes/courses.routes.js");
 app.use("/api/courses", coursesRoutes);
 
+const usersRoutes = require("./routes/users.route.js");
+app.use("/api/users",usersRoutes) // /api/users
+
 // 404 middleware for unhandled routes
 app.use((req, res) => {
   return res.status(404).json({
