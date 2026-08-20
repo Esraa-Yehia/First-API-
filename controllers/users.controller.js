@@ -26,9 +26,7 @@ const getAllUsers=asyncWrapper(async (req, res) => {
 
 
 const register =asyncWrapper(async(req,res,next)=>{
-    console.log(req.body);
-    console.log(req.file);
-
+    
     const {firstName , lastName, email , password,role} = req.body;
 
     const oldUser = await User.findOne({email: email});
@@ -58,8 +56,10 @@ const register =asyncWrapper(async(req,res,next)=>{
    
     await newUser.save();
     
-    res.json({ status: httpStatusText.SUCCESS, data: {user: newUser} });
+    const userObj = newUser.toObject();
+    delete userObj.password;
 
+    res.status(201).json({ status: httpStatusText.SUCCESS, data: { user: userObj }});
 
 })
 
@@ -72,7 +72,8 @@ const login =asyncWrapper(async(req,res,next)=>{
         return next(error);
     }
 
-   const user = await User.findOne({email:email});
+     const user = await User.findOne({ email: email }).select('+password');
+     
    if(!user){
     const error = appError.create('user not found',400,httpStatusText.FAIL)
         
@@ -89,11 +90,10 @@ const login =asyncWrapper(async(req,res,next)=>{
 
       return  res.json({ status: httpStatusText.SUCCESS, data: {token:token, message: 'logged in successfully'} });
    }
-   else{
-       const error = appError.create('something wrong',500,httpStatusText.ERROR)
-        
-        return next(error);
-   }
+   else {
+    const error = appError.create('incorrect password', 400, httpStatusText.FAIL);
+    return next(error);
+}
 
 })
 

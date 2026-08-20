@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run:dev": "nodemon index.js"
+    "run:dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
