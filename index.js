@@ -3,6 +3,9 @@ const url = process.env.MONGO_URL;
 
 const express = require("express");
 const app = express();
+const path = require('path');
+
+app.use('/uploads',express.static(path.join(__dirname,'uploads')));
 
 const mongoose = require("mongoose");
 mongoose.connect(url).then(() => {

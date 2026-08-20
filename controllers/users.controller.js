@@ -27,6 +27,7 @@ const getAllUsers=asyncWrapper(async (req, res) => {
 
 const register =asyncWrapper(async(req,res,next)=>{
     console.log(req.body);
+    console.log(req.file);
 
     const {firstName , lastName, email , password,role} = req.body;
 
@@ -46,7 +47,8 @@ const register =asyncWrapper(async(req,res,next)=>{
         lastName,
         email,
         password:hashedPassword,
-        role
+        role,
+        avatar: req.file.filename
     })
 
     //generate JWT token
