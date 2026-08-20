@@ -1,5 +1,6 @@
 # Courses & Users Management — RESTful API
 
+<<<<<<< HEAD
 ## About
 This is my first practical backend API project built completely from scratch while learning Node.js and Express.js. The goal was to understand how a real-world backend API is structured, implementing core concepts like routing, MVC architecture, authentication, role-based authorization, request validation, and database integration.
 
