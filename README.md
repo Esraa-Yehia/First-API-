@@ -1,34 +1,37 @@
 
-First API 
-A RESTful backend API built with Node.js, Express, MongoDB, and Mongoose.
+First API
 
-This project was built as my first backend project while learning Node.js and Express. It covers the fundamentals of building a real-world API: routing, controllers, middleware, validation, authentication, authorization, file uploads, database integration, error handling, and CRUD operations.
+A RESTful backend API built with Node.js, Express.js, MongoDB, andMongoose.
 
-📌 Project Overview
+This is my first practical backend project. It was built while learningNode.js and Express, with a focus on understanding how a real backendAPI is structured and how its main components work together.
+
+Overview
+
 The API provides two main resources:
 
-Courses — create, read, update, and delete courses.
+Resource      Main Operations
 
-Users — register users, upload profile images, log in, and retrieve users.
+Courses   Create, read, update, deleteUsers     Register, login, retrieve users, upload profile images
 
-The application uses MongoDB Atlas as the database and Mongoose as the ODM.
+The application uses MongoDB Atlas as the database and Mongooseas the ODM.
 
-Main request flow
+Request Flow
+
 Client / Postman
        │
        ▼
-   HTTP Request
+  HTTP Request
        │
        ▼
     Express
        │
        ├── Middleware
-       │     ├── CORS
-       │     ├── JSON parsing
-       │     ├── Authentication
-       │     ├── Authorization
-       │     ├── Validation
-       │     └── File upload
+       │   ├── CORS
+       │   ├── JSON Parsing
+       │   ├── Authentication
+       │   ├── Authorization
+       │   ├── Validation
+       │   └── File Upload
        │
        ▼
      Routes
@@ -43,57 +46,34 @@ Client / Postman
  MongoDB Atlas
        │
        ▼
-   HTTP Response
+ HTTP Response
 
+Features
 
-✨ Features
-RESTful API endpoints
+Category                            Features
 
-Course CRUD operations
+API                                 RESTful API, routing, controllers,CRUD operations
 
-User registration and login
+Authentication                      User login, JWT authentication,password hashing
 
-Password hashing using bcryptjs
+Authorization                       Role-based access control
 
-JWT-based authentication
+Validation                          Request validation withexpress-validator
 
-Role-based authorization
+File Handling                       Image upload with multer, staticfile serving
 
-Request validation using express-validator
+Database                            MongoDB Atlas integration throughMongoose
 
-Image upload using multer
+API Behavior                        Pagination, CORS, centralized errorhandling, 404 handling
 
-Static file serving for uploaded images
+Tech Stack
 
-Pagination using page and limit
+Technology              Purpose
 
-CORS support
+Node.js             JavaScript runtimeExpress.js          Web framework for building the APIMongoDB Atlas       Cloud databaseMongoose            ODM for MongoDBJWT                 Authenticationbcryptjs            Password hashingMulter              File and image uploadsexpress-validator   Request validationCORS                Cross-origin request handlingdotenv              Environment variable managementNodemon             Development auto-restartPostman             API testing
 
-Centralized error handling
+Project Structure
 
-404 handling for unavailable routes
-
-MongoDB Atlas integration through Mongoose
-
-Environment variables using dotenv
-
-Development workflow with Nodemon
-
-🛠️ Tech Stack
-Technology	Purpose
-Node.js	JavaScript runtime
-Express.js	Web framework for building the API
-MongoDB Atlas	Cloud database
-Mongoose	ODM for MongoDB
-JWT	Authentication
-bcryptjs	Password hashing
-Multer	Image/file uploads
-express-validator	Request validation
-CORS	Cross-origin request handling
-dotenv	Environment variable management
-Nodemon	Development auto-restart
-Postman	API testing
-📁 Project Structure
 First-API-/
 │
 ├── controllers/
@@ -128,22 +108,21 @@ First-API-/
 ├── index.js
 ├── package.json
 └── package-lock.json
-🗄️ Data Models
+
+Data Models
+
 Course
-A course contains:
 
 {
   "title": "Node.js",
   "price": 500
 }
-Fields:
 
-title — required string
+Field     Type     Required
 
-price — required number
+title   String   Yesprice   Number   Yes
 
 User
-A user contains:
 
 {
   "firstName": "Esraa",
@@ -153,168 +132,142 @@ A user contains:
   "role": "USER",
   "avatar": "uploads/profile.png"
 }
-Roles currently supported:
 
-USER
+Supported roles in the current implementation:
 
-MANGER
+USER · MANGER · ADMIN
 
-ADMIN
+MANGER is intentionally kept as written in the current projectimplementation.
 
-MANGER is intentionally kept as written in the current project implementation.
+Authentication & Authorization
 
-🔐 Authentication
+Authentication
+
 Authentication is implemented using JSON Web Tokens (JWT).
 
-After a successful login, the API returns a token.
+After a successful login, the API returns a token. Protected requestssend the token through the Authorization header:
 
-Protected requests should include the token in the Authorization header:
+Authorization: Bearer <token>
 
-Authorization: Bearer <TOKEN>
 The verifyToken middleware:
 
-Reads the Authorization header.
+Reads the authorization header.
 
 Extracts the token.
 
-Verifies it using JWT_SECRET_KEY.
+Verifies the token using JWT_SECRET_KEY.
 
 Adds the authenticated user information to req.currentUser.
 
 Allows the request to continue.
 
-JWT expiration is currently configured to 2 minutes in the project.
+The current JWT expiration is configured to 2 minutes.
 
-👮 Authorization
+Authorization
+
 Authentication answers:
 
-"Who are you?"
+Who are you?
 
 Authorization answers:
 
-"Are you allowed to perform this action?"
+Are you allowed to perform this action?
 
 The project uses the allowTo middleware for role-based authorization.
 
-Current course permissions:
+Endpoint              Access
 
-Endpoint	Access
-Get all courses	Public
-Get a single course	Public
-Create a course	Authenticated MANGER
-Update a course	Public in the current implementation
-Delete a course	Authenticated ADMIN or MANGER
-User listing requires authentication.
+Get all courses       PublicGet a single course   PublicCreate a course       Authenticated MANGERUpdate a course       Public in the current implementationDelete a course       Authenticated ADMIN or MANGERGet all users         Authenticated
 
-📚 API Endpoints
-Base URL:
-
-http://localhost:4000
-After deployment, replace the base URL with the deployed API URL.
+API Endpoints
 
 Courses
-Get All Courses
-GET /api/courses
-Optional pagination:
+
+Method            Endpoint                   Description       Access
+
+GET             /api/courses             Get all courses   Public
+
+GET             /api/courses/:courseId   Get a single      Publiccourse
+
+POST            /api/courses             Create a course   MANGER
+
+PATCH           /api/courses/:courseId   Update a course   Public*
+
+DELETE          /api/courses/:courseId   Delete a course   ADMIN, MANGER
+
+* Public access reflects the current project implementation.
+
+Courses Pagination
 
 GET /api/courses?page=1&limit=10
-Query Parameters
-Parameter	Description	Default
-page	Page number	1
-limit	Number of courses per page	10
-Get Single Course
-GET /api/courses/:courseId
-Example:
 
-GET /api/courses/64abc123...
-Returns the requested course if it exists.
+Parameter   Description                  Default
+
+page      Page number                  1limit     Number of courses per page   10
 
 Create Course
+
 POST /api/courses
-Authorization
-Requires:
 
-Authorization: Bearer <TOKEN>
-The authenticated user must have the MANGER role.
+Authorization:
 
-Body
+Authorization: Bearer <token>
+
+Request body:
+
 {
   "title": "Node.js",
   "price": 500
 }
-Both title and price are validated before the course is created.
 
-Update Course
-PATCH /api/courses/:courseId
-Example body:
-
-{
-  "price": 700
-}
-Delete Course
-DELETE /api/courses/:courseId
-Authorization
-Requires:
-
-Authorization: Bearer <TOKEN>
-Allowed roles:
-
-ADMIN
-
-MANGER
+Both title and price are validated before creating the course.
 
 Users
-Get All Users
-GET /api/users
-Authorization
-Requires:
 
-Authorization: Bearer <TOKEN>
-Optional pagination:
+Method   Endpoint                Description           Access
 
-GET /api/users?page=1&limit=10
-Passwords are excluded from the returned user data.
+GET    /api/users            Get all users         AuthenticatedPOST   /api/users/register   Register a new user   PublicPOST   /api/users/login      Login                 Public
 
-Register
+User Registration
+
 POST /api/users/register
-This endpoint uses multipart/form-data because it supports an avatar image upload.
 
-Form fields
-Field	Type	Required
-firstName	Text	Yes
-lastName	Text	Yes
-email	Text	Yes
-password	Text	Yes
-role	Text	No
-avatar	File	No
-The avatar must be an image.
+The endpoint uses multipart/form-data because it supports an optionalavatar image.
+
+Field         Type   Required
+
+firstName   Text   YeslastName    Text   Yesemail       Text   Yespassword    Text   Yesrole        Text   Noavatar      File   No
+
+Only image files are accepted.
 
 Uploaded files are stored in the uploads/ directory.
 
 Login
+
 POST /api/users/login
-JSON body
+
+Request body:
+
 {
   "email": "example@email.com",
   "password": "your-password"
 }
-On successful login, the API returns a JWT token.
 
-Use that token to access protected endpoints.
+On successful login, the API returns a JWT token that can be used toaccess protected endpoints.
 
-🖼️ Uploaded Images
-Uploaded images are stored inside:
+Uploaded Images
+
+Uploaded images are stored in:
 
 /uploads
-The application exposes this directory as static content:
 
-/uploads/<filename>
-This allows uploaded images to be requested through HTTP.
+The directory is exposed as static content, allowing uploaded images tobe requested through HTTP.
 
-⚠️ Error Handling
-The API uses centralized error handling.
+Error Handling
 
-Example error response:
+The API uses centralized error handling to return consistent errorresponses.
+
+Example:
 
 {
   "status": "error",
@@ -322,97 +275,92 @@ Example error response:
   "code": 404,
   "data": null
 }
-Common status codes:
 
-Code	Meaning
-200	Request succeeded
-201	Resource created
-400	Bad request
-401	Unauthorized
-404	Resource not found
-500	Internal server error
+Status Code   Meaning
 
-🔧 Environment Variables
-The application uses environment variables for sensitive configuration.
+200         Request succeeded201         Resource created400         Bad request401         Unauthorized404         Resource not found500         Internal server error
+
+Environment Variables
 
 Create a local .env file:
 
 PORT=4000
 MONGO_URL=your_mongodb_atlas_connection_string
 JWT_SECRET_KEY=your_jwt_secret
-Important
-Never commit .env to GitHub.
 
-The MongoDB connection string and JWT secret are sensitive credentials.
+Do not commit .env to GitHub.
 
-For deployment, configure these values as environment variables on the hosting platform instead of putting them directly in the source code.
+The MongoDB connection string and JWT secret are sensitive credentialsand should be configured as environment variables.
 
-🚀 Running Locally
-1. Clone the repository
-git clone https://github.com/Esraa-Yehia/First-API-.git
+Getting Started
+
+1. Clone the Repository
+
+git clone <repository-url>
 cd First-API-
-2. Install dependencies
+
+2. Install Dependencies
+
 npm install
-3. Create .env
-Add the required environment variables:
+
+3. Configure Environment Variables
+
+Create a .env file and add:
 
 PORT=4000
 MONGO_URL=your_mongodb_atlas_connection_string
 JWT_SECRET_KEY=your_jwt_secret
-4. Start the development server
+
+4. Start the Development Server
+
 npm run run:dev
-The server should start on:
+
+The API will be available at:
 
 http://localhost:4000
-🧪 Testing the API
-The API was tested using Postman.
 
-The main request groups are:
+Testing
+
+The API was tested using Postman.
 
 Courses
 
-Get Courses
-
-Get Single Course
-
-Create Course
-
-Edit Course
-
-Delete Course
+Get Courses · Get Single Course · Create Course · Edit Course ·Delete Course
 
 Users
 
-Get All Users
+Get All Users · Register · Login
 
-Register
+Deployment
 
-Login
+The API can be deployed as a Node.js Web Service on a hostingplatform such as Render.
 
-☁️ Deployment
-This API can be deployed as a Node.js Web Service on platforms such as Render.
-
-The deployed URL will be added here after deployment:
+After deployment, the production API URL can be added here:
 
 Live API: <DEPLOYED_API_URL>
-Production environment variables
-Configure:
+
+The hosting platform should be configured with the required environmentvariables:
 
 MONGO_URL=your_mongodb_atlas_connection_string
 JWT_SECRET_KEY=your_jwt_secret
-PORT=<provided-by-platform>
-The application already uses:
+PORT=<platform-assigned-port>
+
+The application already supports the platform-provided port:
 
 const port = process.env.PORT || 4000;
-so it can use the hosting platform's assigned port.
 
-MongoDB Atlas
-When deploying, the production server must also be allowed to connect to the MongoDB Atlas cluster through the Atlas IP Access List.
+MongoDB Atlas must also allow the deployed server to connect through itsnetwork access configuration.
 
+What I Learned
 
+This project was my first practical backend project and helped meunderstand the fundamentals of building a RESTful API with Node.js andExpress.
 
-GitHub:
-https://github.com/Esraa-Yehia
+Key concepts practiced:
 
-⭐ This project represents my first practical backend API project while learning Node.js and Express.
+Node.js · Express.js · REST APIs · Routing ·Controllers · Middleware · MongoDB · Mongoose · CRUD· JWT Authentication · Authorization · Validation · FileUploads · Error Handling · Environment Variables
 
+Repository
+
+GitHub: Esraa-Yehia / First-API
+
+This project represents my first practical backend API project whilelearning Node.js and Express.
