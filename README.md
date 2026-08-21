@@ -1,15 +1,23 @@
-# Courses & Users Management — RESTful API
+# Courses and Users Management RESTful API
 
 ## About
-This is my first practical backend API project built completely from scratch while learning Node.js and Express.js. The goal was to understand how a real-world backend API is structured, implementing core concepts like routing, MVC architecture, authentication, role-based authorization, request validation, and database integration.
+A scalable, production-ready RESTful API built with Node.js, Express.js, and MongoDB Atlas to manage courses and users. The project implements core backend fundamentals including MVC architecture, token-based authentication (JWT), Role-Based Access Control (RBAC), schema validation, and serverless deployment on Vercel.
 
 ---
 
-## Project Overview
-This project provides a full backend service managing two primary resources:
-* **Courses:** Full CRUD operations with query pagination.
-* **Users & Auth:** Secure registration, avatar uploads, login, and token generation.
-* **Security & Roles:** Role-based access control (`USER`, `MANGER`, `ADMIN`) using JWT and password hashing.
+## Live Demo
+* Base URL: https://courses-management-api.vercel.app
+* Sample Endpoint: https://courses-management-api.vercel.app/api/courses
+
+---
+
+## Key Features
+* **Course Administration:** Full CRUD operations with query pagination (`?page=1&limit=10`).
+* **Authentication and Authorization:** User registration, password hashing via `bcryptjs`, and stateless token issuance using `JWT`.
+* **Role-Based Access Control (RBAC):** Route protection restricted by user roles (`USER`, `MANAGER`, `ADMIN`).
+* **Input Validation:** Request payload verification and sanitization using `express-validator`.
+* **Centralized Error Handling:** Structured JSON error propagation and standardized API responses.
+* **Serverless Architecture:** Dynamic MongoDB connection caching to ensure zero connection timeouts on Vercel cold starts.
 
 ---
 
@@ -17,10 +25,11 @@ This project provides a full backend service managing two primary resources:
 
 | Category | Technology | Description |
 | :--- | :--- | :--- |
-| **Runtime & Framework** | `Node.js` • `Express.js` | JavaScript backend runtime and web application framework |
-| **Database & ODM** | `MongoDB Atlas` • `Mongoose` | Cloud NoSQL database and Object Data Modeling library |
-| **Authentication & Security** | `JWT` • `bcryptjs` • `CORS` | Token-based auth, secure password hashing, and cross-origin handling |
-| **File Handling & Validation** | `Multer` • `express-validator` | Multipart image uploads and incoming request data validation |
+| Runtime & Framework | Node.js • Express.js | Backend execution environment and HTTP routing framework |
+| Database & ODM | MongoDB Atlas • Mongoose | Cloud NoSQL database with schema modeling |
+| Security & Auth | JWT • bcryptjs • CORS | Stateless tokens, password hashing, and cross-origin handling |
+| File Handling & Validation | Multer • express-validator | Request data validation and multipart file processing |
+| Deployment & Hosting | Vercel | Serverless hosting and continuous deployment |
 
 ---
 
@@ -28,14 +37,15 @@ This project provides a full backend service managing two primary resources:
 
 ```text
 First-API/
-├── controllers/      # courses.controll.js • users.controller.js
-├── middlewares/      # allowTo.js • asyncWrapper.js • validationSchema.js • verifyToken.js
-├── models/           # course.model.js • user.model.js
-├── routes/           # courses.routes.js • users.route.js
-├── utils/            # appError.js • generateJWT.js • httpStatusText.js • userRoles.js
-├── uploads/          # Static user avatars
-├── index.js          # App entry point
-└── package.json
+├── controllers/      # Route controllers (courses.controll.js, users.controller.js)
+├── middlewares/      # RBAC guards, token verification, async wrappers, and validations
+├── models/           # Mongoose schemas (course.model.js, user.model.js)
+├── routes/           # REST endpoints definition (courses.routes.js, users.route.js)
+├── utils/            # Custom error handlers, status texts, and constants
+├── uploads/          # Static file storage directory
+├── index.js          # Main application entry point & DB connection caching
+├── vercel.json       # Serverless function configuration
+└── package.json      # Dependencies and scripts
 ```
 
 ---
@@ -44,32 +54,42 @@ First-API/
 
 ### 1. Courses Endpoints (`/api/courses`)
 
-| Method | Endpoint | Description | Access / Roles |
+| Method | Endpoint | Description | Access Level |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/courses` | Get all courses (supports `?page=1&limit=10`) | Public |
-| `GET` | `/api/courses/:courseId` | Get single course by ID | Public |
-| `POST` | `/api/courses` | Create a new course | 🔒 `MANAGER`, `ADMIN` |
+| `GET` | `/api/courses` | Retrieve all courses (supports pagination) | Public |
+| `GET` | `/api/courses/:courseId` | Retrieve single course by ID | Public |
+| `POST` | `/api/courses` | Create a new course | ADMIN, MANAGER |
 | `PATCH` | `/api/courses/:courseId` | Update course details | Public |
-| `DELETE` | `/api/courses/:courseId` | Delete a course | 🔒 `ADMIN`, `MANAGER` |
+| `DELETE` | `/api/courses/:courseId` | Delete a course | ADMIN, MANAGER |
 
-### 2. Users & Auth Endpoints (`/api/users`)
+### 2. Users and Auth Endpoints (`/api/users`)
 
-| Method | Endpoint | Payload Type | Description | Access / Roles |
+| Method | Endpoint | Payload Type | Description | Access Level |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/users` | JSON | Get all users (supports `?page=1&limit=10`) | 🔒 Authenticated |
-| `POST` | `/api/users/register` | `multipart/form-data` | Register new user (avatar support) | Public |
-| `POST` | `/api/users/login` | JSON | Login with `email` and `password` | Public |
+| `POST` | `/api/users/register` | `multipart/form-data` / JSON | Register a new user | Public |
+| `POST` | `/api/users/login` | `application/json` | Authenticate user and receive JWT token | Public |
+| `GET` | `/api/users` | `application/json` | Retrieve all registered users | Authenticated (Token Required) |
 
 ---
 
-## Data Models Summary
+## Data Models
 
-* **Course:** `title` (String, Required) • `price` (Number, Required)
-* **User:** `firstName` (String) • `lastName` (String) • `email` (String, Unique) • `password` (Hashed) • `role` (`USER` | `MANGER` | `ADMIN`) • `avatar` (File Path)
+* **Course Schema:**
+  * `title`: String (Required)
+  * `price`: Number (Required)
+
+* **User Schema:**
+  * `firstName`: String (Required)
+  * `lastName`: String (Required)
+  * `email`: String (Required, Unique)
+  * `password`: String (Hashed)
+  * `role`: String (Enum: `USER`, `MANAGER`, `ADMIN` — Default: `USER`)
+  * `avatar`: String (File Path / Default fallback)
+  * `token`: String (JWT token)
 
 ---
 
-## Installation & Setup
+## Local Setup and Installation
 
 1. **Clone the repository:**
    ```bash
@@ -102,5 +122,6 @@ First-API/
 
 ---
 
-**Author:** [Esraa Yehia](https://github.com/Esraa-Yehia)  
+## Author
+* **Esraa Yehia** — [GitHub Profile](https://github.com/Esraa-Yehia)
 *This project represents my first practical backend API project while learning Node.js and Express.*
