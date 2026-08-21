@@ -8,8 +8,22 @@ const path = require('path');
 app.use('/uploads',express.static(path.join(__dirname,'uploads')));
 
 const mongoose = require("mongoose");
-mongoose.connect(url).then(() => {
-  console.log("mongodb server strated");
+
+let isConnected = false;
+const connectDB = async () => {
+    if (isConnected) return;
+    try {
+        await mongoose.connect(url);
+        isConnected = true;
+        console.log("mongodb connected successfully");
+    } catch (error) {
+        console.log("mongodb connection error:", error);
+    }
+};
+
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
 });
 
 const httpStatusText = require("./utils/httpStatusText.js");
