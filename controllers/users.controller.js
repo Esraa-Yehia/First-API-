@@ -46,7 +46,7 @@ const register =asyncWrapper(async(req,res,next)=>{
         email,
         password:hashedPassword,
         role,
-        avatar: req.file.filename
+        avatar: req.file ? req.file.filename : 'uploads/profile.png'
     })
 
     //generate JWT token
@@ -73,7 +73,7 @@ const login =asyncWrapper(async(req,res,next)=>{
     }
 
      const user = await User.findOne({ email: email }).select('+password');
-     
+
    if(!user){
     const error = appError.create('user not found',400,httpStatusText.FAIL)
         
